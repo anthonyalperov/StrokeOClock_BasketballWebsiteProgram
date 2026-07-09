@@ -508,6 +508,22 @@ th { font-family: var(--font-display); text-transform: uppercase; letter-spacing
 .contact-info-list { list-style: none; padding: 0; margin: 24px 0 0; display: flex; flex-direction: column; gap: 14px; }
 .contact-info-list a { border-bottom: 1px solid var(--line); padding-bottom: 12px; display: block; }
 
+.insta-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 28px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.05rem;
+  color: var(--ink);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.insta-highlight:hover { background: var(--ink); color: var(--paper); }
+
 /* ---- Footer ---- */
 .site-footer {
   background: var(--ink);
