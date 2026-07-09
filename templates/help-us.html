@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Help Us — Stroke O Clock AAU Basketball{% endblock %}
+{% block content %}
+
+<section class="section" style="padding-bottom:0;">
+  <div class="container">
+    <div class="section-eyebrow">Support the Program</div>
+    <h1 style="max-width:22ch;">Every one deserves a shot.</h1>
+    <p class="lede">Gym time, tournament fees, travel, and equipment all add up. Your support keeps the door open for every family, regardless of cost.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="card-grid">
+      {% for option in options %}
+      <div class="card">
+        <h3>{{ option.title }}</h3>
+        <p>{{ option.body }}</p>
+        <a class="btn btn-outline btn-small" style="margin-top:16px;" href="{{ url_for('contact') }}">Get Involved</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-dark text-center">
+  <div class="container center-col">
+    <h2>Questions about giving?</h2>
+    <p class="lede" style="margin:0 auto 28px; color:#cfcfce;">Reach out and we'll walk you through the option that fits best.</p>
+    <a class="btn btn-accent" href="{{ url_for('contact') }}">Contact Us</a>
+  </div>
+</section>
+
+{% endblock %}

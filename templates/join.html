@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Join — Stroke O Clock AAU Basketball{% endblock %}
+{% block content %}
+
+<section class="section" style="padding-bottom:0;">
+  <div class="container">
+    <div class="section-eyebrow">Registration</div>
+    <h1 style="max-width:20ch;">Join Stroke O Clock.</h1>
+    <p class="lede">Complete the form below so we can get your information. Fields marked required must be filled in before you can submit.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="form-shell" style="max-width:900px; margin:0 auto;">
+      <form method="POST" action="{{ url_for('join') }}" id="registration-form" novalidate>
+
+        <fieldset>
+          <legend>Player Information</legend>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="first_name">First Name</label>
+              <input type="text" id="first_name" name="first_name" required value="{{ form.get('first_name','') }}">
+            </div>
+            <div class="form-field">
+              <label for="last_name">Last Name</label>
+              <input type="text" id="last_name" name="last_name" required value="{{ form.get('last_name','') }}">
+            </div>
+            <div class="form-field">
+              <label for="date_of_birth">Date of Birth</label>
+              <input type="date" id="date_of_birth" name="date_of_birth" required value="{{ form.get('date_of_birth','') }}">
+            </div>
+            <div class="form-field">
+              <label for="grade">Grade</label>
+              <select id="grade" name="grade" required>
+                <option value="" disabled {% if not form.get('grade') %}selected{% endif %}>Select grade</option>
+                {% for g in grades %}
+                <option value="{{ g }}" {% if form.get('grade')==g %}selected{% endif %}>{{ g }} Grade</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="school">School</label>
+              <input type="text" id="school" name="school" required value="{{ form.get('school','') }}">
+            </div>
+            <div class="form-field">
+              <label for="position">Position</label>
+              <select id="position" name="position">
+                <option value="">Select position (optional)</option>
+                {% for p in positions %}
+                <option value="{{ p }}" {% if form.get('position')==p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="height">Height <span class="hint"></span></label>
+              <input type="text" id="height" name="height" value="{{ form.get('height','') }}">
+            </div>
+            <div class="form-field">
+              <label for="weight">Weight <span class="hint"></span></label>
+              <input type="text" id="weight" name="weight" value="{{ form.get('weight','') }}">
+            </div>
+            <div class="form-field">
+              <label for="jersey_size">Jersey Size</label>
+              <select id="jersey_size" name="jersey_size">
+                <option value="">Select size (optional)</option>
+                {% for j in jersey_sizes %}
+                <option value="{{ j }}" {% if form.get('jersey_size')==j %}selected{% endif %}>{{ j }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field full">
+              <label for="experience">Basketball Experience</label>
+              <textarea id="experience" name="experience" rows="3" placeholder="Years played, prior teams, leagues, etc.">{{ form.get('experience','') }}</textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Emergency Information</legend>
+          <p class="hint" style="margin-top:-8px; margin-bottom:16px;">This information is only ever visible to program coaches and admins.</p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="emergency_contact">Emergency Contact</label>
+              <input type="text" id="emergency_contact" name="emergency_contact" required value="{{ form.get('emergency_contact','') }}">
+            </div>
+            <div class="form-field">
+              <label for="emergency_phone">Emergency Phone Number</label>
+              <input type="tel" id="emergency_phone" name="emergency_phone" required value="{{ form.get('emergency_phone','') }}">
+            </div>
+            <div class="form-field full">
+              <label for="medical_conditions">Medical Conditions <span class="hint">optional</span></label>
+              <textarea id="medical_conditions" name="medical_conditions" rows="2">{{ form.get('medical_conditions','') }}</textarea>
+            </div>
+            <div class="form-field full">
+              <label for="allergies">Allergies <span class="hint">optional</span></label>
+              <textarea id="allergies" name="allergies" rows="2">{{ form.get('allergies','') }}</textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Additional Information</legend>
+          <div class="form-grid">
+            <div class="form-field full">
+              <label for="notes">Notes / Questions <span class="hint">optional</span></label>
+              <textarea id="notes" name="notes" rows="3">{{ form.get('notes','') }}</textarea>
+            </div>
+          </div>
+          <div class="checkbox-row" style="margin-top:20px;">
+            <input type="checkbox" id="agreement" name="agreement" required {% if form.get('agreement') %}checked{% endif %}>
+            <label for="agreement">I confirm the information above is accurate and agree to be contacted by Stroke O Clock regarding this registration.</label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn-accent">Submit Registration</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

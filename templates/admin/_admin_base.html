@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Admin — Stroke O Clock{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="scoreboard-bar">
+    <div class="container">
+      <span>Stroke O Clock — Admin Dashboard</span>
+      <span>Logged in as {{ session.get('admin_name', 'Coach') }}</span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container nav-row">
+      <a class="logo" href="{{ url_for('admin_dashboard') }}">Stroke<span class="accent-o">O</span>Clock</a>
+      <ul class="nav-links" style="display:flex;">
+        <li><a href="{{ url_for('admin_dashboard') }}">Registrations</a></li>
+        <li><a href="{{ url_for('home') }}" target="_blank" rel="noopener">View Site &#8599;</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a class="btn btn-outline btn-small" href="{{ url_for('admin_logout') }}">Log Out</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container" style="padding-top:24px;">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="flash-list">
+          {% for category, message in messages %}
+          <li class="flash flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      {% endwith %}
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

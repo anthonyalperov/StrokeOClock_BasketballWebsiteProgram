@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}What We Do — Stroke O Clock AAU Basketball{% endblock %}
+{% block content %}
+
+<section class="section" style="padding-bottom:0;">
+  <div class="container">
+    <div class="section-eyebrow">Our Program</div>
+    <h1 style="max-width:22ch;">What STROKE stands for.</h1>
+    <p class="lede">Six letters, six commitments. Every letter plan pulls from these pillars.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="roadmap">
+      {% for area in areas %}
+      <div class="category-block">
+        <div>
+          <div class="category-num" style="font-size:2rem; color:var(--gray-dark);">{{ area.letter }}</div>
+          <h3>{{ area.title }}</h3>
+          <p style="color:var(--muted); margin-top:8px;">{{ area.body }}</p>
+        </div>
+        <div class="pill-list">
+          {% for tag in area.tags %}
+          <span class="pill">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-dark text-center">
+  <div class="container center-col">
+    <h2>See it in practice.</h2>
+    <p class="lede" style="margin:0 auto 28px; color:#cfcfce;">Register your player to experience the program firsthand.</p>
+    <a class="btn btn-accent" href="{{ url_for('join') }}">Join Our Team</a>
+  </div>
+</section>
+
+{% endblock %}

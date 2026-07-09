@@ -1,0 +1,91 @@
+{% extends "admin/_admin_base.html" %}
+{% block title %}{{ player.full_name }} — Stroke O Clock Admin{% endblock %}
+{% block content %}
+
+<section class="section-tight">
+  <div class="container">
+    <a href="{{ url_for('admin_dashboard') }}" style="color:var(--muted); font-size:0.9rem;">&larr; Back to dashboard</a>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin:16px 0 32px;">
+      <div>
+        <div class="section-eyebrow">Registration Review</div>
+        <h2 class="mt-0">{{ player.full_name }}</h2>
+        <span class="status-badge status-{{ player.application_status }}">{{ player.application_status }}</span>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn-outline btn-small" href="{{ url_for('admin_edit_player', player_id=player.id) }}">Edit</a>
+        <form method="POST" action="{{ url_for('admin_delete_player', player_id=player.id) }}" data-confirm="Delete this registration permanently? This can't be undone.">
+          <button type="submit" class="btn btn-danger btn-small">Delete</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <div class="detail-block">
+          <h4>Player Information</h4>
+          <dl class="kv">
+            <dt>Date of Birth</dt><dd>{{ player.date_of_birth.strftime('%b %d, %Y') }} ({{ player.age }} yrs)</dd>
+            <dt>Grade</dt><dd>{{ player.grade }}</dd>
+            <dt>School</dt><dd>{{ player.school }}</dd>
+            <dt>Position</dt><dd>{{ player.position or '—' }}</dd>
+            <dt>Height</dt><dd>{{ player.height or '—' }}</dd>
+            <dt>Weight</dt><dd>{{ player.weight or '—' }}</dd>
+            <dt>Jersey Size</dt><dd>{{ player.jersey_size or '—' }}</dd>
+            <dt>Experience</dt><dd>{{ player.experience or '—' }}</dd>
+          </dl>
+        </div>
+
+        <div class="detail-block">
+          <h4>Parent / Guardian</h4>
+          <dl class="kv">
+            <dt>Name</dt><dd>{{ player.parent_name }}</dd>
+            <dt>Email</dt><dd><a href="mailto:{{ player.parent_email }}">{{ player.parent_email }}</a></dd>
+            <dt>Phone</dt><dd><a href="tel:{{ player.parent_phone }}">{{ player.parent_phone }}</a></dd>
+            <dt>Address</dt><dd>{{ player.address or '—' }}</dd>
+          </dl>
+        </div>
+
+        <div class="detail-block">
+          <h4>Emergency &amp; Medical</h4>
+          <div class="sensitive-note">Sensitive information — visible to authenticated coaches/admins only.</div>
+          <dl class="kv">
+            <dt>Emergency Contact</dt><dd>{{ player.emergency_contact }}</dd>
+            <dt>Emergency Phone</dt><dd>{{ player.emergency_phone }}</dd>
+            <dt>Medical Conditions</dt><dd>{{ player.medical_conditions or 'None listed' }}</dd>
+            <dt>Allergies</dt><dd>{{ player.allergies or 'None listed' }}</dd>
+          </dl>
+        </div>
+
+        {% if player.notes %}
+        <div class="detail-block">
+          <h4>Notes / Questions</h4>
+          <p>{{ player.notes }}</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="detail-block">
+          <h4>Application Status</h4>
+          <form method="POST" action="{{ url_for('admin_update_status', player_id=player.id) }}">
+            <div class="form-field">
+              <select name="status">
+                {% for s in ['Pending', 'Accepted', 'Waitlisted', 'Rejected'] %}
+                <option value="{{ s }}" {% if player.application_status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-accent btn-small" style="margin-top:12px; width:100%; justify-content:center;">Update Status</button>
+          </form>
+        </div>
+        <div class="detail-block">
+          <h4>Submitted</h4>
+          <p style="color:var(--muted); font-size:0.9rem;">{{ player.date_submitted.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

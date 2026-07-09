@@ -1,0 +1,136 @@
+{% extends "admin/_admin_base.html" %}
+{% block title %}Edit {{ player.full_name }} — Stroke O Clock Admin{% endblock %}
+{% block content %}
+
+<section class="section-tight">
+  <div class="container">
+    <a href="{{ url_for('admin_player_detail', player_id=player.id) }}" style="color:var(--muted); font-size:0.9rem;">&larr; Back to {{ player.full_name }}</a>
+
+    <div class="section-header" style="margin:16px 0 28px;">
+      <div class="section-eyebrow">Edit Registration</div>
+      <h2 class="mt-0">{{ player.full_name }}</h2>
+    </div>
+
+    <div class="form-shell" style="max-width:900px;">
+      <form method="POST" action="{{ url_for('admin_edit_player', player_id=player.id) }}">
+
+        <fieldset>
+          <legend>Player Information</legend>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="first_name">First Name</label>
+              <input type="text" id="first_name" name="first_name" required value="{{ player.first_name }}">
+            </div>
+            <div class="form-field">
+              <label for="last_name">Last Name</label>
+              <input type="text" id="last_name" name="last_name" required value="{{ player.last_name }}">
+            </div>
+            <div class="form-field">
+              <label for="date_of_birth">Date of Birth</label>
+              <input type="date" id="date_of_birth" name="date_of_birth" required value="{{ player.date_of_birth.isoformat() }}">
+            </div>
+            <div class="form-field">
+              <label for="grade">Grade</label>
+              <select id="grade" name="grade" required>
+                {% for g in grades %}
+                <option value="{{ g }}" {% if player.grade==g %}selected{% endif %}>{{ g }} Grade</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="school">School</label>
+              <input type="text" id="school" name="school" required value="{{ player.school }}">
+            </div>
+            <div class="form-field">
+              <label for="position">Position</label>
+              <select id="position" name="position">
+                <option value="">—</option>
+                {% for p in positions %}
+                <option value="{{ p }}" {% if player.position==p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="height">Height</label>
+              <input type="text" id="height" name="height" value="{{ player.height or '' }}">
+            </div>
+            <div class="form-field">
+              <label for="weight">Weight</label>
+              <input type="text" id="weight" name="weight" value="{{ player.weight or '' }}">
+            </div>
+            <div class="form-field">
+              <label for="jersey_size">Jersey Size</label>
+              <select id="jersey_size" name="jersey_size">
+                <option value="">—</option>
+                {% for j in jersey_sizes %}
+                <option value="{{ j }}" {% if player.jersey_size==j %}selected{% endif %}>{{ j }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field full">
+              <label for="experience">Basketball Experience</label>
+              <textarea id="experience" name="experience" rows="3">{{ player.experience or '' }}</textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Parent / Guardian Information</legend>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="parent_name">Parent/Guardian Name</label>
+              <input type="text" id="parent_name" name="parent_name" required value="{{ player.parent_name }}">
+            </div>
+            <div class="form-field">
+              <label for="parent_email">Email</label>
+              <input type="email" id="parent_email" name="parent_email" required value="{{ player.parent_email }}">
+            </div>
+            <div class="form-field">
+              <label for="parent_phone">Phone Number</label>
+              <input type="tel" id="parent_phone" name="parent_phone" required value="{{ player.parent_phone }}">
+            </div>
+            <div class="form-field">
+              <label for="address">Address</label>
+              <input type="text" id="address" name="address" value="{{ player.address or '' }}">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Emergency Information</legend>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="emergency_contact">Emergency Contact</label>
+              <input type="text" id="emergency_contact" name="emergency_contact" required value="{{ player.emergency_contact }}">
+            </div>
+            <div class="form-field">
+              <label for="emergency_phone">Emergency Phone Number</label>
+              <input type="tel" id="emergency_phone" name="emergency_phone" required value="{{ player.emergency_phone }}">
+            </div>
+            <div class="form-field full">
+              <label for="medical_conditions">Medical Conditions</label>
+              <textarea id="medical_conditions" name="medical_conditions" rows="2">{{ player.medical_conditions or '' }}</textarea>
+            </div>
+            <div class="form-field full">
+              <label for="allergies">Allergies</label>
+              <textarea id="allergies" name="allergies" rows="2">{{ player.allergies or '' }}</textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Additional Information</legend>
+          <div class="form-field full">
+            <label for="notes">Notes / Questions</label>
+            <textarea id="notes" name="notes" rows="3">{{ player.notes or '' }}</textarea>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn-accent">Save Changes</button>
+        <a href="{{ url_for('admin_player_detail', player_id=player.id) }}" class="btn btn-outline">Cancel</a>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

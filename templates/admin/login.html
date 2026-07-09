@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coach Login — Stroke O Clock</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="background:var(--ink);">
+
+  <main style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;">
+    <div style="width:100%; max-width:420px;">
+      <div class="text-center" style="margin-bottom:28px;">
+        <a href="{{ url_for('home') }}" class="logo" style="color:var(--paper); justify-content:center;">Stroke<span class="accent-o">O</span>Clock</a>
+        <p style="color:#9c9c9d; margin-top:8px;">Coach &amp; Admin Login</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="flash-list">
+          {% for category, message in messages %}
+          <li class="flash flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      {% endwith %}
+
+      <div class="form-shell" style="background:var(--paper);">
+        <form method="POST" action="{{ url_for('admin_login') }}">
+          <div class="form-field full" style="margin-bottom:18px;">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autofocus>
+          </div>
+          <div class="form-field full" style="margin-bottom:24px;">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-accent" style="width:100%; justify-content:center;">Log In</button>
+        </form>
+      </div>
+      <p class="text-center" style="margin-top:20px;"><a href="{{ url_for('home') }}" style="color:#9c9c9d; font-size:0.9rem;">&larr; Back to site</a></p>
+    </div>
+  </main>
+
+</body>
+</html>

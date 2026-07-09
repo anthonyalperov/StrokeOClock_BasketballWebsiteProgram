@@ -1,0 +1,96 @@
+{% extends "admin/_admin_base.html" %}
+{% block title %}Dashboard — Stroke O Clock Admin{% endblock %}
+{% block content %}
+
+<section class="section-tight">
+  <div class="container">
+    <div class="section-header" style="margin-bottom:28px;">
+      <div class="section-eyebrow">Admin Dashboard</div>
+      <h2 class="mt-0">Player Registrations</h2>
+    </div>
+
+    <div class="dash-summary">
+      <div class="card">
+        <div class="stat-value">{{ counts['All'] }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="card">
+        <div class="stat-value">{{ counts['Pending'] }}</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="card">
+        <div class="stat-value">{{ counts['Accepted'] }}</div>
+        <div class="stat-label">Accepted</div>
+      </div>
+      <div class="card">
+        <div class="stat-value">{{ counts['Waitlisted'] }}</div>
+        <div class="stat-label">Waitlisted</div>
+      </div>
+      <div class="card">
+        <div class="stat-value">{{ counts['Rejected'] }}</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+
+    <div class="filter-tabs">
+      {% for label in ['All', 'Pending', 'Accepted', 'Waitlisted', 'Rejected'] %}
+      <a href="{{ url_for('admin_dashboard', status=label) }}" class="{{ 'active' if status_filter == label else '' }}">{{ label }}</a>
+      {% endfor %}
+    </div>
+
+    {% if players %}
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Age / Grade</th>
+            <th>Parent Contact</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in players %}
+          <tr>
+            <td><a href="{{ url_for('admin_player_detail', player_id=p.id) }}"><strong>{{ p.full_name }}</strong></a></td>
+            <td>{{ p.age }} yrs &middot; {{ p.grade }}</td>
+            <td>{{ p.parent_name }}<br><span style="color:var(--muted); font-size:0.85rem;">{{ p.parent_email }}</span></td>
+            <td>{{ p.date_submitted.strftime('%b %d, %Y') }}</td>
+            <td><span class="status-badge status-{{ p.application_status }}">{{ p.application_status }}</span></td>
+            <td><a class="btn btn-outline btn-small" href="{{ url_for('admin_player_detail', player_id=p.id) }}">Review</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="color:var(--muted);">No registrations in this category yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section-tight section-dim">
+  <div class="container">
+    <div class="section-header" style="margin-bottom:20px;">
+      <div class="section-eyebrow">Contact Form</div>
+      <h2 class="mt-0">Recent Messages</h2>
+    </div>
+    {% if messages %}
+    <div class="card-grid">
+      {% for m in messages %}
+      <div class="card">
+        <h3 style="font-size:1.05rem;">{{ m.name }}</h3>
+        <p style="color:var(--muted); font-size:0.85rem; margin-bottom:10px;">{{ m.email }} &middot; {{ m.date_submitted.strftime('%b %d, %Y') }}</p>
+        <p>{{ m.message }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--muted);">No messages yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

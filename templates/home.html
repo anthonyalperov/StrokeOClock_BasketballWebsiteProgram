@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Stroke O Clock AAU Basketball — Home{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-eyebrow">AAU Basketball Program</div>
+      <h1>Lock & clock it<br>when the time runs out.</h1>
+      <p class="lede">Stroke O Clock is a friend-group based program focused on making and pushing a name out and popularizing the AAU and Streetball culture around the Auburn WA area.</p>
+      <div class="hero-actions">
+        <a class="btn btn-accent" href="{{ url_for('join') }}">Join Our Team</a>
+        <a class="btn btn-ghost-light" href="{{ url_for('about') }}">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-logo">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Stroke O Clock AAU Basketball logo">
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Why Choose Stroke O Clock</div>
+      <h2>Development first. Winning follows.</h2>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Real Skill Development</h3>
+        <p>Our duty is to make sure you will get better at the things that matter most on the court. The skills you learn here will translate directly to your game.</p>
+      </div>
+      <div class="card">
+        <h3>Coaching That Cares</h3>
+        <p>Our coaches are invested in every player's growth, on and off the court. We want you to succeed both on and off the court.</p>
+      </div>
+      <div class="card">
+        <h3>A Real Community</h3>
+        <p>Stroke O Clock is built by a group of friends who believe in growing basketball in our city, together.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-dark text-center">
+  <div class="container center-col">
+    <h2>Ready to Join?</h2>
+    <p class="lede" style="margin:0 auto 28px; color:#cfcfce;">Registration takes about five minutes.</p>
+    <a class="btn btn-accent" href="{{ url_for('join') }}">Register Now</a>
+  </div>
+</section>
+
+{% endblock %}

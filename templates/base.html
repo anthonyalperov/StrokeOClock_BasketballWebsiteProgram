@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Stroke O Clock AAU Basketball{% endblock %}</title>
+  <meta name="description" content="Stroke O Clock AAU Basketball — player development, team workouts, and tournament competition.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="scoreboard-bar">
+    <div class="container" style="justify-content:flex-start;">
+      <span>Stroke O Clock AAU Basketball</span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container nav-row">
+      <a class="logo" href="{{ url_for('home') }}">Stroke<span class="accent-o">O</span>Clock</a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+        <li><a href="{{ url_for('what_we_do') }}">What We Do</a></li>
+        <li><a href="{{ url_for('help_us') }}">Help Us</a></li>
+        <li><a href="{{ url_for('contact') }}">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a class="btn btn-accent btn-small" href="{{ url_for('join') }}">Join Our Team</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container" style="padding-top:24px;">
+          <ul class="flash-list">
+            {% for category, message in messages %}
+              <li class="flash flash-{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Stroke<span style="color: var(--gray-medium);">O</span>Clock</div>
+          <p style="color:#9c9c9d; max-width:32ch; font-size:0.9rem;">Player connections and skill development in basketball built on integrity, effort, and strive.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+            <li><a href="{{ url_for('what_we_do') }}">What We Do</a></li>
+            <li><a href="{{ url_for('join') }}">Join</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <ul>
+            <li><a href="{{ url_for('help_us') }}">Help Us</a></li>
+            <li><a href="{{ url_for('help_us') }}">Sponsor</a></li>
+            <li><a href="{{ url_for('help_us') }}">Donate</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="{{ url_for('contact') }}">Get in Touch</a></li>
+            <li><a href="{{ url_for('admin_login') }}">Coach Login</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; {{ 2026 }} Stroke O Clock AAU Basketball.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
