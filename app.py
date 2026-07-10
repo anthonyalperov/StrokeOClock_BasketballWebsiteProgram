@@ -14,6 +14,8 @@ Phases implemented (see PROJECT PLAN):
 
 import os
 import re
+import csv
+import io
 from datetime import datetime, date
 from functools import wraps
 
@@ -22,8 +24,11 @@ load_dotenv()  # reads variables from a local .env file, if present
 
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    flash, session, jsonify, abort
+    flash, session, jsonify, abort, Response, send_file
 )
+from flask_wtf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from models import db, Player, AdminUser, ContactMessage
 
@@ -34,7 +39,17 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me-in
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "instance", "stroke_o_clock.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# Session cookie hardening. SESSION_COOKIE_SECURE is only turned on when
+# FLASK_ENV=production is set, because it requires the site to be served
+# over HTTPS (true on hosts like Render/Railway) — turning it on for local
+# http://127.0.0.1 development would silently break login.
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") == "production"
+
 db.init_app(app)
+csrf = CSRFProtect(app)
+limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")
 
 with app.app_context():
     db.create_all()
@@ -198,12 +213,12 @@ def join():
         errors.append("Grade is required.")
     if not school:
         errors.append("School is required.")
-    if not parent_name:
-        errors.append("Parent/guardian name is required.")
-    if not parent_email or not EMAIL_RE.match(parent_email):
-        errors.append("A valid parent/guardian email is required.")
-    if not parent_phone or not PHONE_RE.match(parent_phone):
-        errors.append("A valid parent/guardian phone number is required.")
+    # Parent/guardian info is optional. If something was entered, it still
+    # has to be a valid email/phone format — but leaving it blank is fine.
+    if parent_email and not EMAIL_RE.match(parent_email):
+        errors.append("Parent/guardian email isn't valid — leave it blank or fix the format.")
+    if parent_phone and not PHONE_RE.match(parent_phone):
+        errors.append("Parent/guardian phone isn't valid — leave it blank or fix the format.")
     if not emergency_contact:
         errors.append("Emergency contact name is required.")
     if not emergency_phone or not PHONE_RE.match(emergency_phone):
@@ -253,6 +268,7 @@ def join():
 # ---------------------------------------------------------------------------
 
 @app.route("/admin/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def admin_login():
     if request.method == "GET":
         return render_template("admin/login.html")
@@ -360,9 +376,9 @@ def admin_edit_player(player_id):
     player.position = form.get("position", "").strip()
     player.jersey_size = form.get("jersey_size", "").strip()
     player.experience = form.get("experience", "").strip()
-    player.parent_name = form.get("parent_name", player.parent_name).strip()
-    player.parent_email = form.get("parent_email", player.parent_email).strip()
-    player.parent_phone = form.get("parent_phone", player.parent_phone).strip()
+    player.parent_name = form.get("parent_name", "").strip()
+    player.parent_email = form.get("parent_email", "").strip()
+    player.parent_phone = form.get("parent_phone", "").strip()
     player.address = form.get("address", "").strip()
     player.emergency_contact = form.get("emergency_contact", player.emergency_contact).strip()
     player.emergency_phone = form.get("emergency_phone", player.emergency_phone).strip()
@@ -385,5 +401,128 @@ def api_players():
     return jsonify([p.to_dict() for p in Player.query.order_by(Player.date_submitted.desc()).all()])
 
 
+# ---------------------------------------------------------------------------
+# CSV export — Item 1
+# ---------------------------------------------------------------------------
+
+CSV_HEADERS = [
+    "First Name", "Last Name", "Date of Birth", "Age", "Grade", "School",
+    "Height", "Weight", "Position", "Jersey Size", "Experience",
+    "Parent Name", "Parent Email", "Parent Phone", "Address",
+    "Emergency Contact", "Emergency Phone", "Medical Conditions", "Allergies",
+    "Notes", "Date Submitted", "Status",
+]
+
+
+@app.route("/admin/export/csv")
+@admin_required
+def admin_export_csv():
+    status_filter = request.args.get("status", "All")
+    query = Player.query
+    if status_filter in {"Pending", "Accepted", "Rejected", "Waitlisted"}:
+        query = query.filter_by(application_status=status_filter)
+    players = query.order_by(Player.date_submitted.desc()).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(CSV_HEADERS)
+    for p in players:
+        writer.writerow([
+            p.first_name, p.last_name,
+            p.date_of_birth.isoformat() if p.date_of_birth else "",
+            p.age, p.grade, p.school, p.height, p.weight, p.position, p.jersey_size,
+            p.experience, p.parent_name, p.parent_email, p.parent_phone, p.address,
+            p.emergency_contact, p.emergency_phone, p.medical_conditions, p.allergies,
+            p.notes,
+            p.date_submitted.strftime("%Y-%m-%d %H:%M") if p.date_submitted else "",
+            p.application_status,
+        ])
+
+    filename = f"stroke-o-clock-registrations-{status_filter.lower()}-{date.today().isoformat()}.csv"
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Database backup download — Item 3
+# ---------------------------------------------------------------------------
+
+@app.route("/admin/backup")
+@admin_required
+def admin_backup():
+    db_path = os.path.join(BASE_DIR, "instance", "stroke_o_clock.db")
+    if not os.path.exists(db_path):
+        flash("No database file found yet.", "error")
+        return redirect(url_for("admin_dashboard"))
+    timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    return send_file(
+        db_path,
+        as_attachment=True,
+        download_name=f"stroke_o_clock_backup_{timestamp}.db",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Admin account management — Item 2
+# ---------------------------------------------------------------------------
+
+@app.route("/admin/manage", methods=["GET", "POST"])
+@admin_required
+def admin_manage():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        display_name = request.form.get("display_name", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        errors = []
+        if not username:
+            errors.append("Username is required.")
+        elif AdminUser.query.filter_by(username=username).first():
+            errors.append(f"Username '{username}' is already taken.")
+        if not display_name:
+            errors.append("Display name is required.")
+        if len(password) < 8:
+            errors.append("Password must be at least 8 characters.")
+        if password != confirm_password:
+            errors.append("Passwords do not match.")
+
+        if errors:
+            for e in errors:
+                flash(e, "error")
+        else:
+            new_admin = AdminUser(username=username, display_name=display_name)
+            new_admin.set_password(password)
+            db.session.add(new_admin)
+            db.session.commit()
+            flash(f"Created a login for {display_name}.", "success")
+            return redirect(url_for("admin_manage"))
+
+    admins = AdminUser.query.order_by(AdminUser.created_at).all()
+    return render_template("admin/manage.html", admins=admins)
+
+
+@app.route("/admin/manage/<int:admin_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_admin(admin_id):
+    if admin_id == session.get("admin_id"):
+        flash("You can't delete the account you're currently logged in with.", "error")
+        return redirect(url_for("admin_manage"))
+
+    target = AdminUser.query.get_or_404(admin_id)
+    name = target.display_name or target.username
+    db.session.delete(target)
+    db.session.commit()
+    flash(f"Removed the login for {name}.", "success")
+    return redirect(url_for("admin_manage"))
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    # debug=True is a real security risk in production (it exposes an
+    # interactive in-browser debugger that can execute code). Set
+    # FLASK_ENV=production on your host to turn it off automatically.
+    debug_mode = os.environ.get("FLASK_ENV") != "production"
+    app.run(debug=debug_mode)

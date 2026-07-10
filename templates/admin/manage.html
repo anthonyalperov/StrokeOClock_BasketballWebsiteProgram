@@ -1,0 +1,80 @@
+{% extends "admin/_admin_base.html" %}
+{% block title %}Manage Admins — Stroke O Clock Admin{% endblock %}
+{% block content %}
+
+<section class="section-tight">
+  <div class="container">
+    <div class="section-header" style="margin-bottom:28px;">
+      <div class="section-eyebrow">Admin Accounts</div>
+      <h2 class="mt-0">Manage Admins</h2>
+      <p style="color:var(--muted); margin-top:8px; max-width:60ch;">
+        Create a login for another coach here — no terminal needed. Anyone with an
+        admin login can see everything on this dashboard, including sensitive
+        player information, so only add people you trust with that.
+      </p>
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <div class="detail-block">
+          <h4>Current Admins</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Created</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for admin in admins %}
+              <tr>
+                <td>{{ admin.display_name or '—' }}{% if admin.id == session.get('admin_id') %} <span style="color:var(--muted); font-size:0.8rem;">(you)</span>{% endif %}</td>
+                <td>{{ admin.username }}</td>
+                <td>{{ admin.created_at.strftime('%b %d, %Y') if admin.created_at else '—' }}</td>
+                <td>
+                  {% if admin.id != session.get('admin_id') %}
+                  <form method="POST" action="{{ url_for('admin_delete_admin', admin_id=admin.id) }}" data-confirm="Remove this admin login? They won't be able to log in anymore.">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-small">Remove</button>
+                  </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="detail-block">
+          <h4>Add a New Admin</h4>
+          <form method="POST" action="{{ url_for('admin_manage') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-field" style="margin-bottom:16px;">
+              <label for="display_name">Display Name</label>
+              <input type="text" id="display_name" name="display_name" required placeholder="e.g. Coach Alvarez">
+            </div>
+            <div class="form-field" style="margin-bottom:16px;">
+              <label for="username">Username</label>
+              <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-field" style="margin-bottom:16px;">
+              <label for="password">Password <span class="hint">min. 8 characters</span></label>
+              <input type="password" id="password" name="password" required minlength="8">
+            </div>
+            <div class="form-field" style="margin-bottom:20px;">
+              <label for="confirm_password">Confirm Password</label>
+              <input type="password" id="confirm_password" name="confirm_password" required minlength="8">
+            </div>
+            <button type="submit" class="btn btn-accent" style="width:100%; justify-content:center;">Create Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -4,9 +4,15 @@
 
 <section class="section-tight">
   <div class="container">
-    <div class="section-header" style="margin-bottom:28px;">
-      <div class="section-eyebrow">Admin Dashboard</div>
-      <h2 class="mt-0">Player Registrations</h2>
+    <div class="section-header" style="margin-bottom:28px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div class="section-eyebrow">Admin Dashboard</div>
+        <h2 class="mt-0">Player Registrations</h2>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn-outline btn-small" href="{{ url_for('admin_export_csv', status=status_filter) }}">Download CSV</a>
+        <a class="btn btn-outline btn-small" href="{{ url_for('admin_backup') }}">Download Backup</a>
+      </div>
     </div>
 
     <div class="dash-summary">
@@ -56,7 +62,7 @@
           <tr>
             <td><a href="{{ url_for('admin_player_detail', player_id=p.id) }}"><strong>{{ p.full_name }}</strong></a></td>
             <td>{{ p.age }} yrs &middot; {{ p.grade }}</td>
-            <td>{{ p.parent_name }}<br><span style="color:var(--muted); font-size:0.85rem;">{{ p.parent_email }}</span></td>
+            <td>{{ p.parent_name or '—' }}{% if p.parent_email %}<br><span style="color:var(--muted); font-size:0.85rem;">{{ p.parent_email }}</span>{% endif %}</td>
             <td>{{ p.date_submitted.strftime('%b %d, %Y') }}</td>
             <td><span class="status-badge status-{{ p.application_status }}">{{ p.application_status }}</span></td>
             <td><a class="btn btn-outline btn-small" href="{{ url_for('admin_player_detail', player_id=p.id) }}">Review</a></td>

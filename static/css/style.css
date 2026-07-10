@@ -280,6 +280,11 @@ button, .btn {
 @media (max-width: 900px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
 
+.card-center {
+  grid-column: 2 / 3;
+}
+@media (max-width: 900px) { .card-center { grid-column: auto; } }
+
 .card {
   border: 1px solid var(--line);
   border-radius: var(--radius);

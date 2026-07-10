@@ -15,6 +15,7 @@
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a class="btn btn-outline btn-small" href="{{ url_for('admin_edit_player', player_id=player.id) }}">Edit</a>
         <form method="POST" action="{{ url_for('admin_delete_player', player_id=player.id) }}" data-confirm="Delete this registration permanently? This can't be undone.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="btn btn-danger btn-small">Delete</button>
         </form>
       </div>
@@ -37,11 +38,11 @@
         </div>
 
         <div class="detail-block">
-          <h4>Parent / Guardian</h4>
+          <h4>Parent / Guardian <span class="hint" style="text-transform:none;">(optional — not collected on this registration)</span></h4>
           <dl class="kv">
-            <dt>Name</dt><dd>{{ player.parent_name }}</dd>
-            <dt>Email</dt><dd><a href="mailto:{{ player.parent_email }}">{{ player.parent_email }}</a></dd>
-            <dt>Phone</dt><dd><a href="tel:{{ player.parent_phone }}">{{ player.parent_phone }}</a></dd>
+            <dt>Name</dt><dd>{{ player.parent_name or '—' }}</dd>
+            <dt>Email</dt><dd>{% if player.parent_email %}<a href="mailto:{{ player.parent_email }}">{{ player.parent_email }}</a>{% else %}—{% endif %}</dd>
+            <dt>Phone</dt><dd>{% if player.parent_phone %}<a href="tel:{{ player.parent_phone }}">{{ player.parent_phone }}</a>{% else %}—{% endif %}</dd>
             <dt>Address</dt><dd>{{ player.address or '—' }}</dd>
           </dl>
         </div>
@@ -69,6 +70,7 @@
         <div class="detail-block">
           <h4>Application Status</h4>
           <form method="POST" action="{{ url_for('admin_update_status', player_id=player.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-field">
               <select name="status">
                 {% for s in ['Pending', 'Accepted', 'Waitlisted', 'Rejected'] %}

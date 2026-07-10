@@ -34,9 +34,9 @@ class Player(db.Model):
     experience = db.Column(db.Text)
 
     # Parent / guardian information
-    parent_name = db.Column(db.String(120), nullable=False)
-    parent_email = db.Column(db.String(120), nullable=False)
-    parent_phone = db.Column(db.String(30), nullable=False)
+    parent_name = db.Column(db.String(120))
+    parent_email = db.Column(db.String(120))
+    parent_phone = db.Column(db.String(30))
     address = db.Column(db.String(200))
 
     # Emergency information (sensitive — never rendered outside admin auth)
