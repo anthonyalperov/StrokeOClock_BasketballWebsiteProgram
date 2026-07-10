@@ -54,6 +54,19 @@ limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")
 with app.app_context():
     db.create_all()
 
+    # One-time bootstrap for hosts with no shell access (e.g. Render free tier).
+    # If no admin exists yet and these env vars are set, create the first
+    # admin automatically on startup. Safe to leave the env vars set
+    # afterward — this only ever fires when there are zero admins.
+    bootstrap_user = os.environ.get("ADMIN_BOOTSTRAP_USERNAME")
+    bootstrap_pass = os.environ.get("ADMIN_BOOTSTRAP_PASSWORD")
+    if bootstrap_user and bootstrap_pass and AdminUser.query.count() == 0:
+        first_admin = AdminUser(username=bootstrap_user, display_name=bootstrap_user)
+        first_admin.set_password(bootstrap_pass)
+        db.session.add(first_admin)
+        db.session.commit()
+        print(f"Bootstrap: created first admin account '{bootstrap_user}'.")
+
 # ---------------------------------------------------------------------------
 # Static site content (kept in Python for now; move to DB/CMS in Phase 4)
 # ---------------------------------------------------------------------------
