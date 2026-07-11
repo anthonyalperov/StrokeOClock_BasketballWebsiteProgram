@@ -31,7 +31,7 @@
               <label for="date_of_birth">Date of Birth</label>
               <input type="date" id="date_of_birth" name="date_of_birth" required value="{{ form.get('date_of_birth','') }}">
             </div>
-            <div class="form-field">
+            <div class="form-field"> 
               <label for="grade">Grade</label>
               <select id="grade" name="grade" required>
                 <option value="" disabled {% if not form.get('grade') %}selected{% endif %}>Select grade</option>
@@ -41,7 +41,8 @@
               </select>
             </div>
             <div class="form-field">
-              <label for="school">School</label>
+              <label for="school">Current School / Former School </label>
+              <label for="school" class="hint">(Can be University, CC, High School)</label>
               <input type="text" id="school" name="school" required value="{{ form.get('school','') }}">
             </div>
             <div class="form-field">
