@@ -43,6 +43,15 @@
               <input type="text" id="school" name="school" required value="{{ player.school }}">
             </div>
             <div class="form-field">
+              <label for="highest_education">Highest Education</label>
+              <select id="highest_education" name="highest_education">
+                <option value="">—</option>
+                {% for e in education_levels %}
+                <option value="{{ e }}" {% if player.highest_education==e %}selected{% endif %}>{{ e }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field">
               <label for="position">Position</label>
               <select id="position" name="position">
                 <option value="">—</option>
@@ -76,19 +85,15 @@
         </fieldset>
 
         <fieldset>
-          <legend>Parent / Guardian Information <span class="hint" style="text-transform:none;">(optional)</span></legend>
+          <legend>Contact Information</legend>
           <div class="form-grid">
             <div class="form-field">
-              <label for="parent_name">Parent/Guardian Name</label>
-              <input type="text" id="parent_name" name="parent_name" value="{{ player.parent_name or '' }}">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required value="{{ player.email }}">
             </div>
             <div class="form-field">
-              <label for="parent_email">Email</label>
-              <input type="email" id="parent_email" name="parent_email" value="{{ player.parent_email or '' }}">
-            </div>
-            <div class="form-field">
-              <label for="parent_phone">Phone Number</label>
-              <input type="tel" id="parent_phone" name="parent_phone" value="{{ player.parent_phone or '' }}">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" required value="{{ player.phone }}">
             </div>
             <div class="form-field">
               <label for="address">Address</label>

@@ -27,16 +27,16 @@ class Player(db.Model):
     date_of_birth = db.Column(db.Date, nullable=False)
     grade = db.Column(db.String(20), nullable=False)
     school = db.Column(db.String(120), nullable=False)
+    highest_education = db.Column(db.String(60))
     height = db.Column(db.String(20))
     weight = db.Column(db.String(20))
     position = db.Column(db.String(40))
     jersey_size = db.Column(db.String(10))
     experience = db.Column(db.Text)
 
-    # Parent / guardian information
-    parent_name = db.Column(db.String(120))
-    parent_email = db.Column(db.String(120))
-    parent_phone = db.Column(db.String(30))
+    # Contact information (whoever is signing up — player or parent)
+    email = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(30), nullable=False)
     address = db.Column(db.String(200))
 
     # Emergency information (sensitive — never rendered outside admin auth)
@@ -75,14 +75,14 @@ class Player(db.Model):
             "age": self.age,
             "grade": self.grade,
             "school": self.school,
+            "highest_education": self.highest_education,
             "height": self.height,
             "weight": self.weight,
             "position": self.position,
             "jersey_size": self.jersey_size,
             "experience": self.experience,
-            "parent_name": self.parent_name,
-            "parent_email": self.parent_email,
-            "parent_phone": self.parent_phone,
+            "email": self.email,
+            "phone": self.phone,
             "address": self.address,
             "emergency_contact": self.emergency_contact,
             "emergency_phone": self.emergency_phone,

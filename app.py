@@ -1,6 +1,6 @@
 """
 Stroke O Clock AAU Basketball — Flask application.
-
+ 
 Run locally:
     pip install -r requirements.txt
     python seed_admin.py        # creates the first admin login
@@ -36,7 +36,22 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me-in-production")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "instance", "stroke_o_clock.db")
+
+# Database config: use Postgres if DATABASE_URL is set (e.g. Render Postgres),
+# otherwise fall back to a local SQLite file for development.
+# Render's free tier wipes local disk on redeploy/restart/spin-down, so
+# SQLite there is fine for quick testing but NOT for real data — attach a
+# Render Postgres database and this picks it up automatically.
+database_url = os.environ.get("DATABASE_URL")
+if database_url:
+    # Render (and historically Heroku) hand out "postgres://" URLs, but
+    # SQLAlchemy 1.4+ requires the "postgresql://" scheme.
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "instance", "stroke_o_clock.db")
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Session cookie hardening. SESSION_COOKIE_SECURE is only turned on when
@@ -125,7 +140,16 @@ SUPPORT_OPTIONS = [
 
 POSITIONS = ["Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center", "Flexible / Not Sure"]
 JERSEY_SIZES = ["YS", "YM", "YL", "AS", "AM", "AL", "AXL"]
-GRADES = ["3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"]
+GRADES = ["9th", "10th", "11th", "12th", "Other", "Not in Education Program"]
+EDUCATION_LEVELS = [
+    "High School Diploma / GED",
+    "Some College",
+    "Associate Degree",
+    "Bachelor's Degree",
+    "Master's Degree",
+    "Doctorate / Professional Degree",
+    "Other",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -191,7 +215,7 @@ def join():
     if request.method == "GET":
         return render_template(
             "join.html", form={}, positions=POSITIONS,
-            jersey_sizes=JERSEY_SIZES, grades=GRADES,
+            jersey_sizes=JERSEY_SIZES, grades=GRADES, education_levels=EDUCATION_LEVELS,
         )
 
     form = request.form
@@ -202,9 +226,8 @@ def join():
     dob_raw = form.get("date_of_birth", "").strip()
     grade = form.get("grade", "").strip()
     school = form.get("school", "").strip()
-    parent_name = form.get("parent_name", "").strip()
-    parent_email = form.get("parent_email", "").strip()
-    parent_phone = form.get("parent_phone", "").strip()
+    email = form.get("email", "").strip()
+    phone = form.get("phone", "").strip()
     emergency_contact = form.get("emergency_contact", "").strip()
     emergency_phone = form.get("emergency_phone", "").strip()
     agreed = form.get("agreement") == "on"
@@ -226,12 +249,10 @@ def join():
         errors.append("Grade is required.")
     if not school:
         errors.append("School is required.")
-    # Parent/guardian info is optional. If something was entered, it still
-    # has to be a valid email/phone format — but leaving it blank is fine.
-    if parent_email and not EMAIL_RE.match(parent_email):
-        errors.append("Parent/guardian email isn't valid — leave it blank or fix the format.")
-    if parent_phone and not PHONE_RE.match(parent_phone):
-        errors.append("Parent/guardian phone isn't valid — leave it blank or fix the format.")
+    if not email or not EMAIL_RE.match(email):
+        errors.append("A valid email is required.")
+    if not phone or not PHONE_RE.match(phone):
+        errors.append("A valid phone number is required.")
     if not emergency_contact:
         errors.append("Emergency contact name is required.")
     if not emergency_phone or not PHONE_RE.match(emergency_phone):
@@ -244,7 +265,7 @@ def join():
             flash(e, "error")
         return render_template(
             "join.html", form=form, positions=POSITIONS,
-            jersey_sizes=JERSEY_SIZES, grades=GRADES,
+            jersey_sizes=JERSEY_SIZES, grades=GRADES, education_levels=EDUCATION_LEVELS,
         ), 400
 
     player = Player(
@@ -253,14 +274,14 @@ def join():
         date_of_birth=dob,
         grade=grade,
         school=school,
+        highest_education=form.get("highest_education", "").strip(),
         height=form.get("height", "").strip(),
         weight=form.get("weight", "").strip(),
         position=form.get("position", "").strip(),
         jersey_size=form.get("jersey_size", "").strip(),
         experience=form.get("experience", "").strip(),
-        parent_name=parent_name,
-        parent_email=parent_email,
-        parent_phone=parent_phone,
+        email=email,
+        phone=phone,
         address=form.get("address", "").strip(),
         emergency_contact=emergency_contact,
         emergency_phone=emergency_phone,
@@ -373,7 +394,7 @@ def admin_edit_player(player_id):
     if request.method == "GET":
         return render_template(
             "admin/edit_player.html", player=player,
-            positions=POSITIONS, jersey_sizes=JERSEY_SIZES, grades=GRADES,
+            positions=POSITIONS, jersey_sizes=JERSEY_SIZES, grades=GRADES, education_levels=EDUCATION_LEVELS,
         )
 
     form = request.form
@@ -384,14 +405,14 @@ def admin_edit_player(player_id):
         player.date_of_birth = dob
     player.grade = form.get("grade", player.grade).strip()
     player.school = form.get("school", player.school).strip()
+    player.highest_education = form.get("highest_education", "").strip()
     player.height = form.get("height", "").strip()
     player.weight = form.get("weight", "").strip()
     player.position = form.get("position", "").strip()
     player.jersey_size = form.get("jersey_size", "").strip()
     player.experience = form.get("experience", "").strip()
-    player.parent_name = form.get("parent_name", "").strip()
-    player.parent_email = form.get("parent_email", "").strip()
-    player.parent_phone = form.get("parent_phone", "").strip()
+    player.email = form.get("email", player.email).strip()
+    player.phone = form.get("phone", player.phone).strip()
     player.address = form.get("address", "").strip()
     player.emergency_contact = form.get("emergency_contact", player.emergency_contact).strip()
     player.emergency_phone = form.get("emergency_phone", player.emergency_phone).strip()
@@ -420,8 +441,8 @@ def api_players():
 
 CSV_HEADERS = [
     "First Name", "Last Name", "Date of Birth", "Age", "Grade", "School",
-    "Height", "Weight", "Position", "Jersey Size", "Experience",
-    "Parent Name", "Parent Email", "Parent Phone", "Address",
+    "Highest Education", "Height", "Weight", "Position", "Jersey Size", "Experience",
+    "Email", "Phone", "Address",
     "Emergency Contact", "Emergency Phone", "Medical Conditions", "Allergies",
     "Notes", "Date Submitted", "Status",
 ]
@@ -443,8 +464,8 @@ def admin_export_csv():
         writer.writerow([
             p.first_name, p.last_name,
             p.date_of_birth.isoformat() if p.date_of_birth else "",
-            p.age, p.grade, p.school, p.height, p.weight, p.position, p.jersey_size,
-            p.experience, p.parent_name, p.parent_email, p.parent_phone, p.address,
+            p.age, p.grade, p.school, p.highest_education, p.height, p.weight, p.position, p.jersey_size,
+            p.experience, p.email, p.phone, p.address,
             p.emergency_contact, p.emergency_phone, p.medical_conditions, p.allergies,
             p.notes,
             p.date_submitted.strftime("%Y-%m-%d %H:%M") if p.date_submitted else "",
